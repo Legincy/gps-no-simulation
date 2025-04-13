@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  gpsno-simulator:
+    build: .
+    image: gpsno-simulator:latest
+    container_name: gpsno-simulator
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - LOG_LEVEL=INFO
