@@ -37,15 +37,10 @@ class Station:
         self._created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._updated_at = None
 
-        if isinstance(device_type, str):
-            try:
-                self._device_type = DeviceType[device_type.upper()]
-            except KeyError:
-                raise ValueError(f"Invalid device type: {device_type}")
-        elif isinstance(device_type, DeviceType):
-            self._device_type = device_type
+        if device_type:
+            self.device_type = device_type
         else:
-            self._device_type = DeviceType.NONE
+            self.device_type = DeviceType.NONE
 
         if mac_address:
             self.mac_address = mac_address
@@ -65,9 +60,6 @@ class Station:
         else:
             self.randomizer = random.uniform(0.1, 0.9)
 
-        if cluster_name:
-            self.cluster_name = cluster_name
-
         if target_point:
             self.target_point = target_point
 
@@ -76,6 +68,9 @@ class Station:
 
         if created_at:
             self.created_at = created_at
+
+        self.cluster_name = cluster_name
+        self.cluster_stations = cluster_stations or []
 
     def _generate_mac(self) -> str:
         xx1 = format(random.randint(0, 255), "02x")
@@ -124,7 +119,10 @@ class Station:
         return {
             "mac_address": self._mac_address,
             "name": self._name,
-            "type": self.device_type_str,
+            "uwb": {
+                "device_type": self.device_type_str,
+                "ranging": self._ranging_data,
+            },
             "cluster": {
                 "name": self._cluster_name,
                 "devices": [device.mac_address for device in self._cluster_stations],
@@ -204,7 +202,6 @@ class Station:
     def name(self, new_name: str) -> None:
         if "name" not in self._updated_fields:
             self._updated_fields.append("name")
-        print(f"Setting name to {new_name}")
         self._name = new_name
 
     @randomizer.setter
@@ -219,15 +216,15 @@ class Station:
 
     @device_type.setter
     def device_type(self, new_device_type: Union[str, DeviceType]) -> None:
+        if "device_type" not in self._updated_fields:
+            self._updated_fields.append("device_type")
+
         if isinstance(new_device_type, str):
             self._device_type = DeviceType[new_device_type.upper()]
         elif isinstance(new_device_type, DeviceType):
             self._device_type = new_device_type
         else:
             raise ValueError("Invalid device type provided.")
-
-        if "device_type" in self._updated_fields:
-            self._updated_fields.append("device_type")
 
     @updated_at.setter
     def updated_at(self, new_updated_at: str) -> None:

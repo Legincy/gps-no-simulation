@@ -5,7 +5,7 @@ import time
 
 import config
 from models.station import DeviceType, Station
-from models.storage import SqliteStorage, get_storage_instance
+from services.storage_service import SqliteStorage, get_storage_instance
 from services.mqtt_service import MqttService
 from services.simulation_service import SimulationService
 
