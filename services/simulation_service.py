@@ -1,5 +1,6 @@
 import math
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from models.station import Station
 
 
@@ -31,23 +32,21 @@ class SimulationService:
 
     def update_device_knowledge(self) -> None:
         for station in self._stations:
-            others_stations = [s for s in self._stations if s.mac_address !=
-                               station.mac_address]
+            others_stations = [
+                s for s in self._stations if s.mac_address != station.mac_address
+            ]
             station.cluster_stations = others_stations
 
     def calculate_distance(self, tag: Station, anchor: Station) -> Dict[str, float]:
-        dx = tag.position['x'] - anchor.position['x']
-        dy = tag.position['y'] - anchor.position['y']
+        dx = tag.position["x"] - anchor.position["x"]
+        dy = tag.position["y"] - anchor.position["y"]
 
         # Pythagorean theorem
         raw_distance = math.sqrt(dx**2 + dy**2)
 
         scaled_distance = raw_distance * self._distance_scaling_factor
 
-        return {
-            'raw_distance': raw_distance,
-            'scaled_distance': scaled_distance
-        }
+        return {"raw_distance": raw_distance, "scaled_distance": scaled_distance}
 
     def update_tag_distances(self, tag: Station) -> None:
         if not tag.is_tag():
