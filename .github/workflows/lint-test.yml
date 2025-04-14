@@ -3,14 +3,14 @@ name: Lint and Test
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - '**.py'
       - 'requirements.txt'
       - '.github/workflows/lint-test.yml'
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - '**.py'
       - 'requirements.txt'
@@ -43,7 +43,7 @@ jobs:
   format:
     name: Format Code
     needs: lint
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && failure('lint')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && failure('lint')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
