@@ -169,7 +169,7 @@ class Station:
     @property
     def randomizer(self) -> float:
         return self._randomizer
-    
+
     @property
     def updated_at(self) -> str:
         return self._updated_at
@@ -193,7 +193,7 @@ class Station:
     @property
     def ranging_data(self) -> List[Dict[str, Any]]:
         return self._ranging_data
-    
+
     @mac_address.setter
     def mac_address(self, new_mac_address: str) -> None:
         if "mac_address" not in self._updated_fields:
