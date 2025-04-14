@@ -15,6 +15,16 @@ MQTT_CLIENT_ID = os.environ.get(
     "MQTT_CLIENT_ID",
     f"gps-no-simulation_{random.randint(0, 255):02x}{random.randint(0, 255):02x}{random.randint(0, 255):02x}",
 )
+RETAIN_MESSAGES = os.environ.get("RETAIN_MESSAGES", "True").lower() in (
+    "true",
+    "1",
+    "t",
+)
+CLEAR_RETAINED_ON_START = os.environ.get("CLEAR_RETAINED_ON_START", "False").lower() in (
+    "true",
+    "1",
+    "t",
+)
 
 # General Configuration
 UPDATE_INTERVAL = float(os.environ.get("UPDATE_INTERVAL", "1.0"))

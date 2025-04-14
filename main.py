@@ -118,9 +118,10 @@ def run_simulation(
 
 def setup_signal_handlers(mqtt_service, storage, simulation_manager):
     def signal_handler(sig, frame):
-        logging.info("\nReceived signal to terminate. Saving state...")
+        logging.info("\nReceived signal to terminate. Saving state and clearing retained MQTT messages...")
 
         storage.save_stations(simulation_manager.stations)
+
         mqtt_service.disconnect()
 
         sys.exit(0)
@@ -159,6 +160,7 @@ def main():
         password=config.MQTT_PASSWORD,
         base_topic=config.MQTT_BASE_TOPIC,
         client_id=config.MQTT_CLIENT_ID,
+        retain_messages=config.RETAIN_MESSAGES,
     )
 
     mqtt_connected = mqtt_service.connect()
@@ -167,6 +169,9 @@ def main():
         sys.exit(1)
 
     setup_signal_handlers(mqtt_service, storage, simulation_service)
+
+    if config.CLEAR_RETAINED_ON_START:
+        mqtt_service.clear_all_retained_messages()
 
     run_simulation(
         simulation_service=simulation_service,
