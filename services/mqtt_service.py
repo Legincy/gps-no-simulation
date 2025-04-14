@@ -111,8 +111,11 @@ class MqttService:
         if len(updated_fields) > 0:
             station.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+            print(f"{station.as_dict}, {updated_fields}")
+
             for field in updated_fields:
                 field_updated = True
+                print(f"handling {field}")
 
                 match field:
                     case "mac_address":

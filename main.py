@@ -5,8 +5,8 @@ import time
 
 import config
 from models.station import DeviceType, Station
-from models.storage import SqliteStorage
-from services.mqtt_service import MqttService, get_storage_instance
+from models.storage import SqliteStorage, get_storage_instance
+from services.mqtt_service import MqttService
 from services.simulation_service import SimulationService
 
 
@@ -91,7 +91,6 @@ def run_simulation(
     try:
         while True:
             num_moved = 0
-            updated_tags = []
 
             for tag in simulation_service.tags:
                 if tag.move(
@@ -104,14 +103,11 @@ def run_simulation(
 
                     simulation_service.update_tag_distances(tag)
                     num_moved += 1
-                    updated_tags.append(tag)
 
-            if updated_tags:
-                for tag in updated_tags:
-                    storage.update_station(tag)
-
-                for tag in updated_tags:
-                    mqtt_service.publish_station(tag)
+            for station in simulation_service.stations:
+                if len(station.updated_fields) > 0:
+                    storage.update_station(station)
+                    mqtt_service.publish_station(station)
 
             time.sleep(interval)
 
