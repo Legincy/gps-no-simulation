@@ -20,7 +20,9 @@ RETAIN_MESSAGES = os.environ.get("RETAIN_MESSAGES", "True").lower() in (
     "1",
     "t",
 )
-CLEAR_RETAINED_ON_START = os.environ.get("CLEAR_RETAINED_ON_START", "False").lower() in (
+CLEAR_RETAINED_ON_START = os.environ.get(
+    "CLEAR_RETAINED_ON_START", "False"
+).lower() in (
     "true",
     "1",
     "t",

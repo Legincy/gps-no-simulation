@@ -118,7 +118,9 @@ def run_simulation(
 
 def setup_signal_handlers(mqtt_service, storage, simulation_manager):
     def signal_handler(sig, frame):
-        logging.info("\nReceived signal to terminate. Saving state and clearing retained MQTT messages...")
+        logging.info(
+            "\nReceived signal to terminate. Saving state and clearing retained MQTT messages..."
+        )
 
         storage.save_stations(simulation_manager.stations)
 

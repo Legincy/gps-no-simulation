@@ -208,7 +208,9 @@ class SqliteStorage(StorageService):
             conn.close()
 
 
-def get_storage_instance(storage_type: str, db_path: str, json_path: str) -> StorageService:
+def get_storage_instance(
+    storage_type: str, db_path: str, json_path: str
+) -> StorageService:
     if storage_type.lower() == "sqlite":
         return SqliteStorage(db_path)
     # elif storage_type.lower() == "json":
