@@ -169,7 +169,7 @@ class Station:
     @property
     def randomizer(self) -> float:
         return self._randomizer
-
+    
     @property
     def updated_at(self) -> str:
         return self._updated_at
@@ -193,16 +193,16 @@ class Station:
     @property
     def ranging_data(self) -> List[Dict[str, Any]]:
         return self._ranging_data
-
+    
     @mac_address.setter
     def mac_address(self, new_mac_address: str) -> None:
-        if not "mac_address" in self._updated_fields:
+        if "mac_address" not in self._updated_fields:
             self._updated_fields.append("mac_address")
         self._mac_address = new_mac_address
 
     @name.setter
     def name(self, new_name: str) -> None:
-        if not "name" in self._updated_fields:
+        if "name" not in self._updated_fields:
             self._updated_fields.append("name")
         self._name = new_name
 
@@ -211,7 +211,7 @@ class Station:
         if not (0 <= new_randomizer <= 1):
             raise ValueError("Randomizer must be between 0 and 1.")
 
-        if not "randomizer" in self._updated_fields:
+        if "randomizer" not in self._updated_fields:
             self._updated_fields.append("randomizer")
 
         self._randomizer = new_randomizer
@@ -225,54 +225,51 @@ class Station:
         else:
             raise ValueError("Invalid device type provided.")
 
-        if not "device_type" in self._updated_fields:
+        if "device_type" in self._updated_fields:
             self._updated_fields.append("device_type")
 
     @updated_at.setter
     def updated_at(self, new_updated_at: str) -> None:
-        if not "updated_at" in self._updated_fields:
+        if "updated_at" not in self._updated_fields:
             self._updated_fields.append("updated_at")
 
         self._updated_at = new_updated_at
 
     @property
     def created_at(self) -> Optional[str]:
-        if "created_at" in self._updated_fields:
-            self._updated_fields.remove("created_at")
-
         return self._created_at
 
     @created_at.setter
     def created_at(self, new_created_at: str) -> None:
-        if not "created_at" in self._updated_fields:
+        if "created_at" not in self._updated_fields:
             self._updated_fields.append("created_at")
 
         self._created_at = new_created_at
 
     @cluster_name.setter
     def cluster_name(self, new_cluster_name: str) -> None:
-        if not "cluster_name" in self._updated_fields:
+        if "cluster_name" not in self._updated_fields:
             self._updated_fields.append("cluster_name")
 
         self._cluster_name = new_cluster_name
 
     @position.setter
     def position(self, new_position: Dict[str, float]) -> None:
-        if not "position" in self._updated_fields:
+        if "position" not in self._updated_fields:
             self._updated_fields.append("position")
 
         self._position = new_position
 
     @target_point.setter
     def target_point(self, new_target: Dict[str, float]) -> None:
-        if not "target_point" in self._updated_fields:
+        if "target_point" not in self._updated_fields:
             self._updated_fields.append("target_point")
 
         self._target_point = new_target
 
     @cluster_stations.setter
     def cluster_stations(self, devices: List["Station"]) -> None:
-        if not "cluster_stations" in self._updated_fields:
+        if "cluster_stations" not in self._updated_fields:
             self._updated_fields.append("cluster_stations")
 
         self._cluster_stations = devices
