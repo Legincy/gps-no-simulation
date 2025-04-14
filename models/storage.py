@@ -1,6 +1,6 @@
-import sqlite3
-import os
 import logging
+import os
+import sqlite3
 from typing import List, Optional
 
 from models.station import DeviceType, Station
@@ -9,16 +9,13 @@ from models.station import DeviceType, Station
 class Storage:
 
     def load_stations(self) -> List[Station]:
-        raise NotImplementedError(
-            "This method must be implemented by a derived class")
+        raise NotImplementedError("This method must be implemented by a derived class")
 
     def save_stations(self, stations: List[Station]) -> None:
-        raise NotImplementedError(
-            "This method must be implemented by a derived class")
+        raise NotImplementedError("This method must be implemented by a derived class")
 
     def update_station(self, station: Station) -> None:
-        raise NotImplementedError(
-            "This method must be implemented by a derived class")
+        raise NotImplementedError("This method must be implemented by a derived class")
 
 
 class SqliteStorage(Storage):
@@ -29,8 +26,7 @@ class SqliteStorage(Storage):
 
     def _get_connection(self) -> sqlite3.Connection:
         if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
-            os.makedirs(os.path.dirname(
-                os.path.abspath(self.db_path)), exist_ok=True)
+            os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
 
         return sqlite3.connect(self.db_path)
 
@@ -38,7 +34,8 @@ class SqliteStorage(Storage):
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        cursor.execute('''
+        cursor.execute(
+            """
         CREATE TABLE IF NOT EXISTS stations (
             mac_address TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -52,7 +49,8 @@ class SqliteStorage(Storage):
             target_x REAL,
             target_y REAL
         )
-        ''')
+        """
+        )
 
         conn.commit()
         conn.close()
@@ -69,23 +67,33 @@ class SqliteStorage(Storage):
             station.randomizer,
             station.updated_at,
             station.created_at,
-            position['x'],
-            position['y'],
-            target_point['x'],
-            target_point['y']
+            position["x"],
+            position["y"],
+            target_point["x"],
+            target_point["y"],
         )
 
     def _db_to_station(self, row: tuple) -> Station:
-        mac_address, name, device_type_str, cluster_name, randomizer, updated_at, created_at, pos_x, pos_y, target_x, target_y = row
+        (
+            mac_address,
+            name,
+            device_type_str,
+            cluster_name,
+            randomizer,
+            updated_at,
+            created_at,
+            pos_x,
+            pos_y,
+            target_x,
+            target_y,
+        ) = row
 
         station = Station(
             mac_address=mac_address,
             name=name,
             device_type=device_type_str,
-            position={
-                'x': pos_x, 'y': pos_y},
-            target_point={
-                'x': target_x, 'y': target_y},
+            position={"x": pos_x, "y": pos_y},
+            target_point={"x": target_x, "y": target_y},
             randomizer=randomizer,
             cluster_name=cluster_name,
         )
@@ -95,7 +103,9 @@ class SqliteStorage(Storage):
 
         return station
 
-    def load_stations_by_device_type(self, device_type: DeviceType, amount: Optional[int] = None) -> List[Station]:
+    def load_stations_by_device_type(
+        self, device_type: DeviceType, amount: Optional[int] = None
+    ) -> List[Station]:
         conn = self._get_connection()
         cursor = conn.cursor()
         device_type_str = device_type.value
@@ -115,12 +125,12 @@ class SqliteStorage(Storage):
 
             if devices:
                 logging.info(
-                    f"Successfully loaded {len(devices)} {device_type}s from database")
+                    f"Successfully loaded {len(devices)} {device_type}s from database"
+                )
 
             return devices
         except Exception as e:
-            logging.error(
-                f"Error while loading {device_type_str}s from database: {e}")
+            logging.error(f"Error while loading {device_type_str}s from database: {e}")
             return []
         finally:
             conn.close()
@@ -140,7 +150,8 @@ class SqliteStorage(Storage):
 
             if len(stations) > 0:
                 logging.info(
-                    f"Successfully loaded {len(stations)} stations from database")
+                    f"Successfully loaded {len(stations)} stations from database"
+                )
 
             return stations
         except Exception as e:
@@ -155,19 +166,20 @@ class SqliteStorage(Storage):
 
         try:
             for station in stations:
-                cursor.execute('''
+                cursor.execute(
+                    """
                 INSERT OR REPLACE INTO stations 
                 (mac_address, name, type, cluster_name, randomizer, updated_at, created_at, position_x, position_y, target_x, target_y)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', self._station_to_db_format(station))
+                """,
+                    self._station_to_db_format(station),
+                )
 
             conn.commit()
-            logging.debug(
-                f"Updated {len(stations)} stations in database")
+            logging.debug(f"Updated {len(stations)} stations in database")
         except Exception as e:
             conn.rollback()
-            logging.error(
-                f"Error while saving stations to database: {e}")
+            logging.error(f"Error while saving stations to database: {e}")
         finally:
             conn.close()
 
@@ -176,18 +188,22 @@ class SqliteStorage(Storage):
         cursor = conn.cursor()
 
         try:
-            cursor.execute('''
+            cursor.execute(
+                """
             INSERT OR REPLACE INTO stations 
             (mac_address, name, type, cluster_name, randomizer, updated_at, created_at, position_x, position_y, target_x, target_y)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', self._station_to_db_format(station))
+            """,
+                self._station_to_db_format(station),
+            )
 
             conn.commit()
             logging.debug(f"Updated station {station.name} in database")
         except Exception as e:
             conn.rollback()
             logging.error(
-                f"Error while updating station {station.name} in database: {e}")
+                f"Error while updating station {station.name} in database: {e}"
+            )
         finally:
             conn.close()
 
@@ -199,4 +215,5 @@ def get_storage_instance(storage_type: str, db_path: str, json_path: str) -> Sto
     #    return JsonStorage(json_path)
     else:
         raise ValueError(
-            f"Unknown storage type: {storage_type}. Supported types are 'sqlite' and 'json'.")
+            f"Unknown storage type: {storage_type}. Supported types are 'sqlite' and 'json'."
+        )

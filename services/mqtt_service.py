@@ -2,7 +2,7 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import List, Optional, Callable
+from typing import Callable, List, Optional
 
 from models.station import DeviceType, Station
 
@@ -10,7 +10,8 @@ try:
     import paho.mqtt.client as mqtt
 except ImportError:
     logging.error(
-        "Couldn't import paho-mqtt. Please install it with 'pip install paho-mqtt'")
+        "Couldn't import paho-mqtt. Please install it with 'pip install paho-mqtt'"
+    )
     raise
 
 
@@ -22,7 +23,7 @@ class MqttService:
         user: Optional[str] = None,
         password: Optional[str] = None,
         base_topic: str = "gpsno/simulation",
-        client_id: Optional[str] = None
+        client_id: Optional[str] = None,
     ):
         self.broker = broker
         self.port = port
@@ -41,7 +42,8 @@ class MqttService:
         try:
             try:
                 self.mqtt_client = mqtt.Client(
-                    client_id=self.client_id, protocol=mqtt.MQTTv5)
+                    client_id=self.client_id, protocol=mqtt.MQTTv5
+                )
                 self.mqtt_client.on_connect = self._on_connect_v5
             except Exception:
                 self.mqtt_client = mqtt.Client(client_id=self.client_id)
@@ -60,11 +62,13 @@ class MqttService:
 
             if self.connected:
                 logging.info(
-                    f"Successfully connected to MQTT broker: {self.broker}:{self.port}")
+                    f"Successfully connected to MQTT broker: {self.broker}:{self.port}"
+                )
                 return True
             else:
                 logging.error(
-                    f"Timeout while connecting to MQTT broker: {self.broker}:{self.port}")
+                    f"Timeout while connecting to MQTT broker: {self.broker}:{self.port}"
+                )
                 self.disconnect()
                 return False
 
@@ -91,14 +95,14 @@ class MqttService:
                 self.mqtt_client.disconnect()
                 logging.info("Disconnected from MQTT broker")
             except Exception as e:
-                logging.error(
-                    f"Error while disconnecting from MQTT broker: {e}")
+                logging.error(f"Error while disconnecting from MQTT broker: {e}")
         self.connected = False
 
     def publish_station(self, station: Station) -> None:
         if not self.connected or not self.mqtt_client:
             logging.warning(
-                "There is no connection to the MQTT broker. Cannot publish station.")
+                "There is no connection to the MQTT broker. Cannot publish station."
+            )
             return []
 
         updated_fields = station.updated_fields
@@ -113,65 +117,82 @@ class MqttService:
                 match field:
                     case "mac_address":
                         self.mqtt_client.publish(
-                            f"{base_topic}/mac_address", station.mac_address)
+                            f"{base_topic}/mac_address", station.mac_address
+                        )
                     case "name":
-                        self.mqtt_client.publish(
-                            f"{base_topic}/name", station.name)
+                        self.mqtt_client.publish(f"{base_topic}/name", station.name)
                     case "device_type":
                         self.mqtt_client.publish(
-                            f"{base_topic}/uwb/type", station.device_type_str)
+                            f"{base_topic}/uwb/type", station.device_type_str
+                        )
                     case "cluster_name":
                         self.mqtt_client.publish(
                             f"{base_topic}/uwb/cluster/name",
-                            "None" if station.cluster_name is None else station.cluster_name)
+                            (
+                                "None"
+                                if station.cluster_name is None
+                                else station.cluster_name
+                            ),
+                        )
                     case "cluster_stations":
                         self.mqtt_client.publish(
                             f"{base_topic}/uwb/cluster/stations",
-                            json.dumps(station.cluster_foreign_mac_addresses))
+                            json.dumps(station.cluster_foreign_mac_addresses),
+                        )
                     case "randomizer":
                         self.mqtt_client.publish(
-                            f"{base_topic}/dev/randomizer",
-                            str(station.randomizer))
+                            f"{base_topic}/dev/randomizer", str(station.randomizer)
+                        )
                     case "position":
                         pos = station.position
                         self.mqtt_client.publish(
-                            f"{base_topic}/dev/position/x", str(pos['x']))
+                            f"{base_topic}/dev/position/x", str(pos["x"])
+                        )
                         self.mqtt_client.publish(
-                            f"{base_topic}/dev/position/y", str(pos['y']))
+                            f"{base_topic}/dev/position/y", str(pos["y"])
+                        )
                     case "target_point":
                         target = station.target_point
                         if target and station.device_type == DeviceType.TAG:
                             self.mqtt_client.publish(
-                                f"{base_topic}/dev/target_point/x", str(target['x']))
+                                f"{base_topic}/dev/target_point/x", str(target["x"])
+                            )
                             self.mqtt_client.publish(
-                                f"{base_topic}/dev/target_point/y", str(target['y']))
+                                f"{base_topic}/dev/target_point/y", str(target["y"])
+                            )
                     case "ranging_data":
                         self.mqtt_client.publish(
-                            f"{base_topic}/uwb/ranging", json.dumps(station.ranging_data))
+                            f"{base_topic}/uwb/ranging",
+                            json.dumps(station.ranging_data),
+                        )
                     case "created_at":
                         self.mqtt_client.publish(
-                            f"{base_topic}/dev/created_at", station.created_at)
+                            f"{base_topic}/dev/created_at", station.created_at
+                        )
                     case "updated_at":
                         self.mqtt_client.publish(
-                            f"{base_topic}/dev/updated_at", station.updated_at)
+                            f"{base_topic}/dev/updated_at", station.updated_at
+                        )
                     case _:
                         field_updated = False
 
                         logging.warning(
-                            f"Unknown field '{field}' in station {station.name} ({station.mac_address})")
+                            f"Unknown field '{field}' in station {station.name} ({station.mac_address})"
+                        )
 
                 if field_updated:
                     station.remove_from_updated_fields(field)
 
             self.mqtt_client.publish(
-                f"{base_topic}/dev/json", json.dumps(station.as_dict))
-            self.mqtt_client.publish(
-                f"{base_topic}/dev/updated_at", station.updated_at)
+                f"{base_topic}/dev/json", json.dumps(station.as_dict)
+            )
+            self.mqtt_client.publish(f"{base_topic}/dev/updated_at", station.updated_at)
 
     def publish_status(self, stations: List[Station]) -> None:
         if not self.connected or not self.mqtt_client:
             logging.warning(
-                "There is no connection to the MQTT broker. Cannot publish status.")
+                "There is no connection to the MQTT broker. Cannot publish status."
+            )
             return
 
         for station in stations:

@@ -1,8 +1,8 @@
-import random
 import math
+import random
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Union
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 
 class DeviceType(Enum):
@@ -21,17 +21,17 @@ class Station:
         randomizer: Optional[float] = None,
         cluster_name: Optional[str] = None,
         target_point: Optional[Dict[str, float]] = None,
-        cluster_stations: Optional[List['Station']] = None,
+        cluster_stations: Optional[List["Station"]] = None,
         created_at: Optional[str] = None,
     ):
         self._updated_fields = []
 
         self._mac_address = None
         self._name = None
-        self._position = {'x': 0, 'y': 0}
+        self._position = {"x": 0, "y": 0}
         self._randomizer = None
         self._cluster_name = None
-        self._target_point = {'x': 0, 'y': 0}
+        self._target_point = {"x": 0, "y": 0}
         self._cluster_stations = []
         self._ranging_data = []
         self._created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -78,34 +78,45 @@ class Station:
             self.created_at = created_at
 
     def _generate_mac(self) -> str:
-        xx1 = format(random.randint(0, 255), '02x')
-        xx2 = format(random.randint(0, 255), '02x')
-        xx3 = format(random.randint(0, 255), '02x')
+        xx1 = format(random.randint(0, 255), "02x")
+        xx2 = format(random.randint(0, 255), "02x")
+        xx3 = format(random.randint(0, 255), "02x")
         return f"ab:cd:ef:{xx1}:{xx2}:{xx3}"
 
     def _generate_name(self) -> str:
-        if hasattr(self, 'mac_address'):
-            parts = self.mac_address.split(':')
+        if hasattr(self, "mac_address"):
+            parts = self.mac_address.split(":")
             if len(parts) >= 6:
-                last_parts = ''.join(parts[3:]).lower()
+                last_parts = "".join(parts[3:]).lower()
                 return f"GPS:No Station-{last_parts}"
 
-        xx1 = format(random.randint(0, 255), '02x')
-        xx2 = format(random.randint(0, 255), '02x')
-        xx3 = format(random.randint(0, 255), '02x')
+        xx1 = format(random.randint(0, 255), "02x")
+        xx2 = format(random.randint(0, 255), "02x")
+        xx3 = format(random.randint(0, 255), "02x")
         last_six = f"{xx1}{xx2}{xx3}".lower()
         return f"GPS:No Station-{last_six}"
 
     def set_random_position(self, size_x: int, size_y: int) -> None:
-        self.position = {
-            'x': random.randint(0, size_x),
-            'y': random.randint(0, size_y)
-        }
+        self.position = {"x": random.randint(0, size_x), "y": random.randint(0, size_y)}
 
-    def set_random_target_point(self, size_x: int, size_y: int, offset_radius: int) -> None:
+    def set_random_target_point(
+        self, size_x: int, size_y: int, offset_radius: int
+    ) -> None:
         self.target_point = {
-            'x': max(0, min(size_x, self.position["x"] + random.randint(-offset_radius, offset_radius))),
-            'y': max(0, min(size_y, self.position["y"] + random.randint(-offset_radius, offset_radius)))
+            "x": max(
+                0,
+                min(
+                    size_x,
+                    self.position["x"] + random.randint(-offset_radius, offset_radius),
+                ),
+            ),
+            "y": max(
+                0,
+                min(
+                    size_y,
+                    self.position["y"] + random.randint(-offset_radius, offset_radius),
+                ),
+            ),
         }
 
     @property
@@ -116,7 +127,7 @@ class Station:
             "type": self.device_type_str,
             "cluster": {
                 "name": self._cluster_name,
-                "devices": [device.mac_address for device in self._cluster_stations]
+                "devices": [device.mac_address for device in self._cluster_stations],
             },
             "dev": {
                 "position": self._position,
@@ -124,7 +135,7 @@ class Station:
                 "randomizer": self._randomizer,
                 "updated_at": self._updated_at,
                 "created_at": self._created_at,
-            }
+            },
         }
 
     @property
@@ -148,7 +159,7 @@ class Station:
         return self._cluster_name
 
     @property
-    def cluster_stations(self) -> List['Station']:
+    def cluster_stations(self) -> List["Station"]:
         return self._cluster_stations
 
     @property
@@ -172,7 +183,7 @@ class Station:
         return self._target_point
 
     @property
-    def cluster_stations(self) -> List['Station']:
+    def cluster_stations(self) -> List["Station"]:
         return self._cluster_stations
 
     @property
@@ -260,7 +271,7 @@ class Station:
         self._target_point = new_target
 
     @cluster_stations.setter
-    def cluster_stations(self, devices: List['Station']) -> None:
+    def cluster_stations(self, devices: List["Station"]) -> None:
         if not "cluster_stations" in self._updated_fields:
             self._updated_fields.append("cluster_stations")
 
@@ -276,54 +287,63 @@ class Station:
     def is_tag(self) -> bool:
         return self._device_type == DeviceType.TAG
 
-    def move(self, speed: float, realistic_movement: bool, target_proximity: float, size_x: int, size_y: int) -> bool:
+    def move(
+        self,
+        speed: float,
+        realistic_movement: bool,
+        target_proximity: float,
+        size_x: int,
+        size_y: int,
+    ) -> bool:
         if not self.is_tag():
             return False
 
         if realistic_movement and random.random() > self._randomizer:
             return False
 
-        dx = self.target_point['x'] - self.position['x']
-        dy = self.target_point['y'] - self.position['y']
+        dx = self.target_point["x"] - self.position["x"]
+        dy = self.target_point["y"] - self.position["y"]
         angle = math.atan2(dy, dx)
 
-        new_x = self.position['x'] + speed * math.cos(angle)
-        new_y = self.position['y'] + speed * math.sin(angle)
+        new_x = self.position["x"] + speed * math.cos(angle)
+        new_y = self.position["y"] + speed * math.sin(angle)
 
         new_x = max(0, min(size_x, new_x))
         new_y = max(0, min(size_y, new_y))
 
-        self.position = {'x': new_x, 'y': new_y}
+        self.position = {"x": new_x, "y": new_y}
 
-        if abs(new_x - self.target_point['x']) < target_proximity and abs(new_y - self.target_point['y']) < target_proximity:
+        if (
+            abs(new_x - self.target_point["x"]) < target_proximity
+            and abs(new_y - self.target_point["y"]) < target_proximity
+        ):
             self.target_point = {
-                'x': random.randint(0, size_x),
-                'y': random.randint(0, size_y)
+                "x": random.randint(0, size_x),
+                "y": random.randint(0, size_y),
             }
 
         return True
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'mac_address': self.mac_address,
-            'name': self.name,
-            'randomizer': self.randomizer,
-            'updated_at': self.updated_at,
-            'uwb': self.raw_data
+            "mac_address": self.mac_address,
+            "name": self.name,
+            "randomizer": self.randomizer,
+            "updated_at": self.updated_at,
+            "uwb": self.raw_data,
         }
 
-    def add_distance_to_anchor(self, anchor: 'Station', distance_data: Dict[str, float]) -> None:
+    def add_distance_to_anchor(
+        self, anchor: "Station", distance_data: Dict[str, float]
+    ) -> None:
         if not self.is_tag():
             return
 
-        anchor_info = {
-            'mac_address': anchor.mac_address,
-            'distance': distance_data
-        }
+        anchor_info = {"mac_address": anchor.mac_address, "distance": distance_data}
 
         for device in self._ranging_data:
             if device["mac_address"] == anchor.mac_address:
-                device['distance'] = distance_data
+                device["distance"] = distance_data
                 break
         else:
             self._ranging_data.append(anchor_info)
