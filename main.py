@@ -5,9 +5,9 @@ import time
 
 import config
 from models.station import DeviceType, Station
-from services.storage_service import SqliteStorage, get_storage_instance
 from services.mqtt_service import MqttService
 from services.simulation_service import SimulationService
+from services.storage_service import SqliteStorage, get_storage_instance
 
 
 def setup_logging() -> None:
