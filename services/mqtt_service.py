@@ -202,7 +202,9 @@ class MqttService:
 
             match field:
                 case "mac_address":
-                    self.publish(f"{base_topic}/device/mac_address", station.mac_address)
+                    self.publish(
+                        f"{base_topic}/device/mac_address", station.mac_address
+                    )
                 case "name":
                     self.publish(f"{base_topic}/device/name", station.name)
                 case "device_type":

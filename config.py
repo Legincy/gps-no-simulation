@@ -48,9 +48,11 @@ REGENERATE_POSITIONS = os.environ.get("REGENERATE_POSITIONS", "False").lower() i
 MOVEMENT_SPEED = float(os.environ.get("MOVEMENT_SPEED", "10.0"))
 TARGET_POINT_OFFSET_RADIUS = int(os.environ.get("TARGET_POINT_OFFSET_RADIUS", "200"))
 TARGET_POINT_PROXIMITY = float(os.environ.get("TARGET_PROXIMITY", "25.0"))
-FORCE_CLUSTER_RANGING = os.environ.get(
-    "FORCE_CLUSTER_RANGING", "False"
-).lower() in ("true", "1", "t")
+FORCE_CLUSTER_RANGING = os.environ.get("FORCE_CLUSTER_RANGING", "False").lower() in (
+    "true",
+    "1",
+    "t",
+)
 
 # Storage Configuration
 STORAGE_TYPE = os.environ.get("STORAGE_TYPE", "sqlite")
