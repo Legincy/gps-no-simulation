@@ -68,6 +68,19 @@ def prepare_stations(
 
         storage.update_station(tag)
 
+    if config.FORCE_CLUSTER_RANGING:
+        pass
+    else:
+        clusters = {}
+        for station in simulation_service.stations:
+            if station.cluster_name not in clusters:
+                clusters[station.cluster_name] = []
+            clusters[station.cluster_name].append(station)
+
+        for cluster in clusters.values():
+            for station in cluster:
+                station.cluster_stations = [s for s in cluster if s != station]
+
     if anchors_needed > 0 or tags_needed > 0:
         logging.info(f"Created {anchors_needed} new anchors and {tags_needed} new tags")
 

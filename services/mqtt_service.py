@@ -195,71 +195,73 @@ class MqttService:
         updated_fields = station.updated_fields
         base_topic = f"{self.base_topic}/devices/{station.name.replace(' ', '_').replace(':', '')}"
 
-        if len(updated_fields) > 0:
-            station.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        station.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            for field in updated_fields:
-                field_updated = True
+        for field in updated_fields:
+            field_updated = True
 
-                match field:
-                    case "mac_address":
-                        self.publish(f"{base_topic}/mac_address", station.mac_address)
-                    case "name":
-                        self.publish(f"{base_topic}/name", station.name)
-                    case "device_type":
-                        self.publish(f"{base_topic}/uwb/type", station.device_type_str)
-                    case "cluster_name":
+            match field:
+                case "mac_address":
+                    self.publish(f"{base_topic}/device/mac_address", station.mac_address)
+                case "name":
+                    self.publish(f"{base_topic}/device/name", station.name)
+                case "device_type":
+                    self.publish(f"{base_topic}/uwb/type", station.device_type_str)
+                case "cluster_name":
+                    self.publish(
+                        f"{base_topic}/uwb/cluster/name",
+                        (
+                            "None"
+                            if station.cluster_name is None
+                            else station.cluster_name
+                        ),
+                    )
+                case "cluster_stations":
+                    self.publish(
+                        f"{base_topic}/uwb/cluster/stations",
+                        json.dumps(station.cluster_foreign_mac_addresses),
+                    )
+                case "randomizer":
+                    self.publish(
+                        f"{base_topic}/device/randomizer", str(station.randomizer)
+                    )
+                case "position":
+                    pos = station.position
+                    self.publish(f"{base_topic}/device/position/x", str(pos["x"]))
+                    self.publish(f"{base_topic}/device/position/y", str(pos["y"]))
+                case "target_point":
+                    target = station.target_point
+                    if target and station.device_type == DeviceType.TAG:
                         self.publish(
-                            f"{base_topic}/uwb/cluster/name",
-                            (
-                                "None"
-                                if station.cluster_name is None
-                                else station.cluster_name
-                            ),
+                            f"{base_topic}/device/target_point/x", str(target["x"])
                         )
-                    case "cluster_stations":
                         self.publish(
-                            f"{base_topic}/uwb/cluster/stations",
-                            json.dumps(station.cluster_foreign_mac_addresses),
+                            f"{base_topic}/device/target_point/y", str(target["y"])
                         )
-                    case "randomizer":
-                        self.publish(
-                            f"{base_topic}/dev/randomizer", str(station.randomizer)
-                        )
-                    case "position":
-                        pos = station.position
-                        self.publish(f"{base_topic}/dev/position/x", str(pos["x"]))
-                        self.publish(f"{base_topic}/dev/position/y", str(pos["y"]))
-                    case "target_point":
-                        target = station.target_point
-                        if target and station.device_type == DeviceType.TAG:
-                            self.publish(
-                                f"{base_topic}/dev/target_point/x", str(target["x"])
-                            )
-                            self.publish(
-                                f"{base_topic}/dev/target_point/y", str(target["y"])
-                            )
-                    case "ranging_data":
-                        self.publish(
-                            f"{base_topic}/uwb/ranging",
-                            json.dumps(station.ranging_data),
-                        )
-                    case "created_at":
-                        self.publish(f"{base_topic}/dev/created_at", station.created_at)
-                    case "updated_at":
-                        self.publish(f"{base_topic}/dev/updated_at", station.updated_at)
-                    case _:
-                        field_updated = False
+                case "ranging_data":
+                    self.publish(
+                        f"{base_topic}/uwb/ranging",
+                        json.dumps(station.ranging_data),
+                    )
+                case "created_at":
+                    self.publish(f"{base_topic}/device/created_at", station.created_at)
+                case "updated_at":
+                    self.publish(f"{base_topic}/device/updated_at", station.updated_at)
+                case "started_at":
+                    self.publish(f"{base_topic}/device/started_at", station.started_at)
+                case _:
+                    field_updated = False
 
-                        logging.warning(
-                            f"Unknown field '{field}' in station {station.name} ({station.mac_address})"
-                        )
+                    logging.warning(
+                        f"Unknown field '{field}' in station {station.name} ({station.mac_address})"
+                    )
 
-                if field_updated:
-                    station.remove_from_updated_fields(field)
+            if field_updated:
+                station.remove_from_updated_fields(field)
 
-            self.publish(f"{base_topic}/dev/json", json.dumps(station.as_dict))
-            self.publish(f"{base_topic}/dev/updated_at", station.updated_at)
+        self.publish(f"{base_topic}/device/raw", json.dumps(station.as_dict))
+        self.publish(f"{base_topic}/device/updated_at", station.updated_at)
+        self.publish(f"{base_topic}/device/uptime", station.uptime_in_ms)
 
     def publish_status(self, stations: List[Station]) -> None:
         if not self.connected or not self.mqtt_client:

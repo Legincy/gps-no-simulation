@@ -36,6 +36,7 @@ class Station:
         self._ranging_data = []
         self._created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._updated_at = None
+        self._startedAt = None
 
         if device_type:
             self.device_type = device_type
@@ -69,8 +70,9 @@ class Station:
         if created_at:
             self.created_at = created_at
 
-        self.cluster_name = cluster_name
+        self.cluster_name = cluster_name 
         self.cluster_stations = cluster_stations or []
+        self.started_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
 
     def _generate_mac(self) -> str:
         xx1 = format(random.randint(0, 255), "02x")
@@ -117,22 +119,21 @@ class Station:
     @property
     def as_dict(self) -> Dict[str, Any]:
         return {
-            "mac_address": self._mac_address,
-            "name": self._name,
             "uwb": {
                 "device_type": self.device_type_str,
-                "ranging": self._ranging_data,
-            },
-            "cluster": {
+                "cluster": {
                 "name": self._cluster_name,
                 "devices": [device.mac_address for device in self._cluster_stations],
             },
-            "dev": {
-                "position": self._position,
-                "target_point": self._target_point,
+            },
+            "device": {
+                "mac_address": self._mac_address,
+                "name": self._name,
                 "randomizer": self._randomizer,
                 "updated_at": self._updated_at,
                 "created_at": self._created_at,
+                "started_at": self._started_at,
+                "uptime": self.uptime_in_ms,
             },
         }
 
@@ -191,6 +192,22 @@ class Station:
     @property
     def ranging_data(self) -> List[Dict[str, Any]]:
         return self._ranging_data
+    
+    @property
+    def uptime_in_ms(self) -> int:
+        return int(
+            (datetime.now() - datetime.strptime(self.started_at, "%Y-%m-%d %H:%M:%S")).total_seconds() * 1000
+        )
+    
+    @property
+    def started_at(self) -> str:
+        return self._started_at
+    
+    @started_at.setter
+    def started_at(self, new_started_at: str) -> None:
+        if "started_at" not in self._updated_fields:
+            self._updated_fields.append("started_at")
+        self._started_at = new_started_at
 
     @mac_address.setter
     def mac_address(self, new_mac_address: str) -> None:
