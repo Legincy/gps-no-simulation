@@ -351,11 +351,11 @@ class Station:
         if not self.is_tag():
             return
 
-        anchor_info = {"mac_address": anchor.mac_address, "distance": distance_data}
+        anchor_info = {"source_address": self._mac_address , "destination_address": anchor.mac_address, "distance": distance_data}
 
-        for device in self._ranging_data:
-            if device["mac_address"] == anchor.mac_address:
-                device["distance"] = distance_data
+        for datapoint in self._ranging_data:
+            if datapoint["destination_address"] == anchor.mac_address:
+                datapoint["distance"] = distance_data
                 break
         else:
             self._ranging_data.append(anchor_info)
