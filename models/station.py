@@ -70,9 +70,9 @@ class Station:
         if created_at:
             self.created_at = created_at
 
-        self.cluster_name = cluster_name 
+        self.cluster_name = cluster_name
         self.cluster_stations = cluster_stations or []
-        self.started_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
+        self.started_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def _generate_mac(self) -> str:
         xx1 = format(random.randint(0, 255), "02x")
@@ -122,9 +122,11 @@ class Station:
             "uwb": {
                 "device_type": self.device_type_str,
                 "cluster": {
-                "name": self._cluster_name,
-                "devices": [device.mac_address for device in self._cluster_stations],
-            },
+                    "name": self._cluster_name,
+                    "devices": [
+                        device.mac_address for device in self._cluster_stations
+                    ],
+                },
             },
             "device": {
                 "mac_address": self._mac_address,
@@ -192,17 +194,20 @@ class Station:
     @property
     def ranging_data(self) -> List[Dict[str, Any]]:
         return self._ranging_data
-    
+
     @property
     def uptime_in_ms(self) -> int:
         return int(
-            (datetime.now() - datetime.strptime(self.started_at, "%Y-%m-%d %H:%M:%S")).total_seconds() * 1000
+            (
+                datetime.now() - datetime.strptime(self.started_at, "%Y-%m-%d %H:%M:%S")
+            ).total_seconds()
+            * 1000
         )
-    
+
     @property
     def started_at(self) -> str:
         return self._started_at
-    
+
     @started_at.setter
     def started_at(self, new_started_at: str) -> None:
         if "started_at" not in self._updated_fields:
