@@ -193,7 +193,7 @@ class MqttService:
             return []
 
         updated_fields = station.updated_fields
-        #base_topic = f"{self.base_topic}/devices/{station.name.replace(' ', '_').replace(':', '')}"
+        # base_topic = f"{self.base_topic}/devices/{station.name.replace(' ', '_').replace(':', '')}"
         base_topic = f"{self.base_topic}/devices/{station.mac_address.replace(':', '')}"
 
         station.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

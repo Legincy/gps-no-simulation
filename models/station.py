@@ -204,7 +204,7 @@ class Station:
     @property
     def started_at(self) -> str:
         return self._started_at
-    
+
     def get_cluster_stations(self) -> List[Dict[str, str]]:
         stations = []
 
