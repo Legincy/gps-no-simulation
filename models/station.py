@@ -123,9 +123,7 @@ class Station:
                 "device_type": self.device_type_str,
                 "cluster": {
                     "name": self._cluster_name,
-                    "devices": [
-                        device.mac_address for device in self._cluster_stations
-                    ],
+                    "devices": self.get_cluster_stations(),
                 },
             },
             "device": {
@@ -135,7 +133,6 @@ class Station:
                 "updated_at": self._updated_at,
                 "created_at": self._created_at,
                 "started_at": self._started_at,
-                "uptime": self.uptime_in_ms,
             },
         }
 
@@ -207,6 +204,19 @@ class Station:
     @property
     def started_at(self) -> str:
         return self._started_at
+    
+    def get_cluster_stations(self) -> List[Dict[str, str]]:
+        stations = []
+
+        for station in self._cluster_stations:
+            stations.append(
+                {
+                    "address": station.mac_address,
+                    "device_type": station.device_type_str,
+                }
+            )
+
+        return stations
 
     @started_at.setter
     def started_at(self, new_started_at: str) -> None:

@@ -60,7 +60,7 @@ DB_PATH = os.environ.get("DB_PATH", "simulation.db")
 JSON_PATH = os.environ.get("JSON_PATH", "simulation.json")
 
 # Cluster-Konfiguration
-DEFAULT_CLUSTER = os.environ.get("DEFAULT_CLUSTER", None)
+DEFAULT_CLUSTER = os.environ.get("DEFAULT_CLUSTER", "Simulation")
 
 # Logging-Konfiguration
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")

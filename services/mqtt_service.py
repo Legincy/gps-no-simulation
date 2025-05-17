@@ -193,7 +193,8 @@ class MqttService:
             return []
 
         updated_fields = station.updated_fields
-        base_topic = f"{self.base_topic}/devices/{station.name.replace(' ', '_').replace(':', '')}"
+        #base_topic = f"{self.base_topic}/devices/{station.name.replace(' ', '_').replace(':', '')}"
+        base_topic = f"{self.base_topic}/devices/{station.mac_address.replace(':', '')}"
 
         station.updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -207,22 +208,6 @@ class MqttService:
                     )
                 case "name":
                     self.publish(f"{base_topic}/device/name", station.name)
-                case "device_type":
-                    self.publish(f"{base_topic}/uwb/type", station.device_type_str)
-                case "cluster_name":
-                    self.publish(
-                        f"{base_topic}/uwb/cluster/name",
-                        (
-                            "None"
-                            if station.cluster_name is None
-                            else station.cluster_name
-                        ),
-                    )
-                case "cluster_stations":
-                    self.publish(
-                        f"{base_topic}/uwb/cluster/stations",
-                        json.dumps(station.cluster_foreign_mac_addresses),
-                    )
                 case "randomizer":
                     self.publish(
                         f"{base_topic}/device/randomizer", str(station.randomizer)
@@ -254,7 +239,7 @@ class MqttService:
                 case _:
                     field_updated = False
 
-                    logging.warning(
+                    logging.debug(
                         f"Unknown field '{field}' in station {station.name} ({station.mac_address})"
                     )
 
